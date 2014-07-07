@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">Japanische Summen Löser</string>
+    <string name="playfieldsize">Spielfeldgröße</string>
+    <string name="maxNumber">Maximalwert</string>
+    <string name="solveButton">Löse Rätsel</string>
+    <string name="newGame">Neues Spiel</string>
+    <string name="regeln">wie funktionieren Japanische Summen?</string>
+    <string name="notimplementes">Diese Funktion ist noch nicht implementiert, dies ist für die nächste Version geplant!</string>
+    <string name="explain">Wie funktioniert das Spiel?</string>
+    <string name="title_activity_playfield">Japanische Summen Löser</string>
+    <string name="solve">Löse!</string>
+    <string name="back">Zurück</string>
+    <string name="leereVorgabe">...</string>
+    <string name="leererEintrag"></string>
+    <string name="EnterSums">Gib die Folge von Summen ein (z.B. 3 5 7)</string>
+    <string name="next">Okay</string>
+    <string name="numberInvalid">Die eingabe darf nur Zahlen, getrennt durch Leerzeichen, enthalten.</string>
+    <string name="cancel">Cancel</string>
+    <string name="playfieldnotOkay">Bitte fülle erst alle Summenfelder aus!</string>
+    <string name="progressdialog">Rechne</string>
+    <string name="thereisnoSolution">Für diese Summenfelder existiert keine Lösung</string>
+    <string name="noSolutionFound">Die Lösung für dieses Rätsel ist nicht eindeutig!</string>
+    <string name="numberToBig">Einer der Werte ist zu groß für den Wertebereich!</string>
+    <string name="enterSum">Eingabe Summen</string>
+
+</resources>

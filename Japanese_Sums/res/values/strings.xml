@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">Japanese Sums Solver</string>
+    <string name="playfieldsize">Playfieldsize</string>
+    <string name="maxNumber">max. Value</string>
+    <string name="solveButton">Solve Puzzle</string>
+    <string name="newGame">New Game</string>
+    <string name="regeln">what are japanese sums</string>
+    <string name="notimplementes">this functionality is not implemented yet but planned for the next version.</string>
+    <string name="explain">what are the rules?</string>
+    <string name="title_activity_playfield">Japanese Sum Solver </string>
+    <string name="hello_world">Hello world!</string>
+    <string name="solve">Solve</string>
+    <string name="back">Back</string>
+    <string name="leereVorgabe">...</string>
+    <string name="leererEintrag"></string>
+    <string name="EnterSums">enter the sequence of sums (e. g. 3 5 7)</string>
+    <string name="next">Okay</string>
+    <string name="numberInvalid">Input is not a sequence of numbers!</string>
+    <string name="cancel">Cancel</string>
+    <string name="playfieldnotOkay">Fill out all sum fields first!</string>
+    <string name="progressdialog">Calculating</string>
+    <string name="thereisnoSolution">There is no solution for the given values!</string>
+    <string name="noSolutionFound">The solution of this riddle is not unique!</string>
+    <string name="numberToBig">Sum value is to high</string>
+    <string name="enterSum">Enter values of the sum field</string>
+
+</resources>
