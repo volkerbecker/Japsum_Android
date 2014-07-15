@@ -1,7 +1,5 @@
 package de.amazingsax.japanese_sums;
 
-import android.app.Activity;
-import android.app.Dialog;
 import android.app.DialogFragment;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -9,7 +7,6 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.view.WindowManager.LayoutParams;
-import android.webkit.WebView.FindListener;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
@@ -21,32 +18,32 @@ public class SummenDialog extends DialogFragment implements OnClickListener {
 	int i;
 	boolean horizontal;
 
-	public SummenDialog() { };
-	
-	public void setContext(PlayfieldActivity context,int i,boolean horizontal) {
-		aufrufer=context;
-		this.i=i;
-		this.horizontal=horizontal;
+	public SummenDialog() {
+	};
+
+	public void setContext(PlayfieldActivity context, int i, boolean horizontal) {
+		aufrufer = context;
+		this.i = i;
+		this.horizontal = horizontal;
 	}
 
 	@Override
-	public View onCreateView(LayoutInflater inflater,
-			ViewGroup container,
+	public View onCreateView(LayoutInflater inflater, ViewGroup container,
 			Bundle bundle) {
-			getDialog().setTitle(R.string.enterSum);
-			View view = inflater.inflate(R.layout.summen_eingabedialog,container, false);
-			okayButton=(Button)view.findViewById(R.id.dialogButtonOk);
-			okayButton.setOnClickListener(this);
-			eingabe=(EditText)view.findViewById(R.id.summenEingabe);
-			Button b=(Button)view.findViewById(R.id.sumDialogCancel);
-			b.setOnClickListener(this);
-			eingabe.requestFocus();
-			getDialog().getWindow().setSoftInputMode(
-	                LayoutParams.SOFT_INPUT_STATE_VISIBLE);
+		getDialog().setTitle(R.string.enterSum);
+		View view = inflater.inflate(R.layout.summen_eingabedialog, container,
+				false);
+		okayButton = (Button) view.findViewById(R.id.dialogButtonOk);
+		okayButton.setOnClickListener(this);
+		eingabe = (EditText) view.findViewById(R.id.summenEingabe);
+		Button b = (Button) view.findViewById(R.id.sumDialogCancel);
+		b.setOnClickListener(this);
+		eingabe.requestFocus();
+		getDialog().getWindow().setSoftInputMode(
+				LayoutParams.SOFT_INPUT_STATE_VISIBLE);
 
-			return view;
-			}
-
+		return view;
+	}
 
 	@Override
 	public void onClick(View v) {

@@ -27,4 +27,9 @@ public class LittleHelpers {
 		  java.util.Arrays.sort( p );
 		  return false;
 		}
+	
+	public static byte myrandom(byte max) {
+		++max;
+		return (byte) (Math.random()*max);
+	}
 }

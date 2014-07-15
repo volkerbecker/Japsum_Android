@@ -19,10 +19,11 @@
     <string name="numberInvalid">Die eingabe darf nur Zahlen, getrennt durch Leerzeichen, enthalten.</string>
     <string name="cancel">Cancel</string>
     <string name="playfieldnotOkay">Bitte fülle erst alle Summenfelder aus!</string>
-    <string name="progressdialog">Rechne</string>
+    <string name="progressdialog">berechne Eintraege(2/2)</string>
     <string name="thereisnoSolution">Für diese Summenfelder existiert keine Lösung</string>
     <string name="noSolutionFound">Die Lösung für dieses Rätsel ist nicht eindeutig!</string>
     <string name="numberToBig">Einer der Werte ist zu groß für den Wertebereich!</string>
     <string name="enterSum">Eingabe Summen</string>
+    <string name="progressPermut">berechne Permutationen (1/2)</string>
 
 </resources>

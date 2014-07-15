@@ -20,10 +20,11 @@
     <string name="numberInvalid">Input is not a sequence of numbers!</string>
     <string name="cancel">Cancel</string>
     <string name="playfieldnotOkay">Fill out all sum fields first!</string>
-    <string name="progressdialog">Calculating</string>
+    <string name="progressdialog">Calculating entries(2/2)</string>
     <string name="thereisnoSolution">There is no solution for the given values!</string>
     <string name="noSolutionFound">The solution of this riddle is not unique!</string>
     <string name="numberToBig">Sum value is to high</string>
     <string name="enterSum">Enter values of the sum field</string>
+    <string name="progressPermut">calculating permutations (1/2)</string>
 
 </resources>

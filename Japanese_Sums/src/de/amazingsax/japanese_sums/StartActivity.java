@@ -3,9 +3,6 @@ package de.amazingsax.japanese_sums;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
-import android.text.InputFilter.LengthFilter;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
@@ -15,7 +12,7 @@ import android.widget.Toast;
 
 public class StartActivity extends Activity implements OnClickListener {
 	
-	final int maxplayfieldSize=11; // gibt eignetlich keinen zwingenden Grund
+	final int maxplayfieldSize=15; // gibt eignetlich keinen zwingenden Grund
 	final int maxnumber=9; // aber wenn zweistellige Zahlen erlaubt waeren wirds unübersichtlich
 	
 	NumberPicker pickerPlayfieldSize;
@@ -48,13 +45,13 @@ public class StartActivity extends Activity implements OnClickListener {
 		
 		//Voreingestellte Werte setzen
 		pickerPlayfieldSize.setMinValue(3);
-		pickerPlayfieldSize.setMaxValue(11);
+		pickerPlayfieldSize.setMaxValue(maxplayfieldSize);
 		pickerPlayfieldSize.setValue(6);
 		pickerPlayfieldSize.setWrapSelectorWheel(false);
 		pickerPlayfieldSize.setOnValueChangedListener(valueChangeListener);
 		
 		pickerMaxNumber.setMinValue(1);
-		pickerMaxNumber.setMaxValue(9);
+		pickerMaxNumber.setMaxValue(maxnumber);
 		pickerMaxNumber.setValue(5);
 		pickerMaxNumber.setWrapSelectorWheel(false);
 		
@@ -74,12 +71,17 @@ public class StartActivity extends Activity implements OnClickListener {
 			intent.putExtra("playfieldSize",pickerPlayfieldSize.getValue());
 			intent.putExtra("maxNumber",pickerMaxNumber.getValue());
 			intent.putExtra("playAsGame",false);
-			startActivity(intent); // Seite mit Spielfeld starten.
+			startActivity(intent); // Activity Spielfeld als löser starten.
 			break;
 		case R.id.newGameButton:
-			Toast to = Toast.makeText(this,R.string.notimplementes,Toast.LENGTH_SHORT);
-			to.show();
-
+//			Intent intent2 = new Intent(this,PlayfieldActivity.class);
+//			intent2.putExtra("playfieldSize",pickerPlayfieldSize.getValue());
+//			intent2.putExtra("maxNumber",pickerMaxNumber.getValue());
+//			intent2.putExtra("playAsGame",true);
+//			startActivity(intent2); // Activity Spielfeld als Rätsel starten
+			Toast toast = Toast.makeText(this,R.string.notimplementes,Toast.LENGTH_LONG);
+			toast.show();
+			break;
 		default:
 			break;
 		}
