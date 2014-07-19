@@ -2,6 +2,7 @@ package de.amazingsax.japanese_sums;
 
 import android.app.DialogFragment;
 import android.os.Bundle;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -38,10 +39,12 @@ public class SummenDialog extends DialogFragment implements OnClickListener {
 		eingabe = (EditText) view.findViewById(R.id.summenEingabe);
 		Button b = (Button) view.findViewById(R.id.sumDialogCancel);
 		b.setOnClickListener(this);
+		b=(Button)view.findViewById(R.id.spaceButton);
+		b.setOnClickListener(this);
 		eingabe.requestFocus();
 		getDialog().getWindow().setSoftInputMode(
 				LayoutParams.SOFT_INPUT_STATE_VISIBLE);
-
+		
 		return view;
 	}
 
@@ -80,6 +83,10 @@ public class SummenDialog extends DialogFragment implements OnClickListener {
 				toast.show();
 				eingabe.setText("");
 			}
+			break;
+		case R.id.spaceButton:
+			String s=eingabe.getText().toString();
+			eingabe.dispatchKeyEvent(new KeyEvent(KeyEvent.ACTION_DOWN,KeyEvent.KEYCODE_SPACE));
 			break;
 		case R.id.sumDialogCancel:
 			this.dismiss();

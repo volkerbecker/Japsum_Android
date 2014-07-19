@@ -9,18 +9,26 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.os.Handler;
 import android.os.Message;
+import android.util.Log;
 
 /**
  * @author sax Enthaelt das Spielfeld bestehend aus Summenbloecken und
  *         Feldelementen, stellt methoden zur Loesung bereit
  */
 public class Playfield extends Thread {
-	ProgressDialog progress;
+	
+	final static float empiricalMemoryFactor=(float)0.015; //abgeschaetzter Faktor zwischen Maximalem
+												    //heap und anzahl der Permutationen
+	
+	private ProgressDialog progress;
 	Handler handler;
 	boolean solveable;
 	boolean solutionFound;
+	boolean isToComplex;
 	PlayfieldActivity context;
 
+	
+	
 	/**
 	 * Komnstruktor, erschafft ein spielfeld
 	 * 
@@ -74,6 +82,10 @@ public class Playfield extends Thread {
 		}
 	}
 	
+	public boolean isToComplex()  {
+		return isToComplex; 
+	}
+	
 	public ArrayList<byte[]> gethBlocks() {
 		return hblocks;
 	}
@@ -102,7 +114,8 @@ public class Playfield extends Thread {
 		}
 	}
 	
-
+	
+	
 	@Override
 	public void run() {
 		try {
@@ -162,7 +175,7 @@ public class Playfield extends Thread {
 		}
 	}
 
-	public boolean tryLines(boolean hv, int line) {
+	public boolean tryLines(boolean hv, int line,ArrayList<sumPermutations> hpertubations, ArrayList<sumPermutations> vpertubations) {
 		sumPermutations lineToTest;
 		boolean retvalue = false;
 
@@ -229,8 +242,14 @@ public class Playfield extends Thread {
 	}
 
 	public boolean solve() throws IllegalStateException {
+		ArrayList<sumPermutations> hpertubations = new ArrayList<sumPermutations>();
+		ArrayList<sumPermutations> vpertubations = new ArrayList<sumPermutations>();
 		boolean somthinChanges = false;
+		int numberOFpermutations=0;
+		Runtime rt = Runtime.getRuntime();
+		long maxMemory = rt.maxMemory();
 		
+		//sumPermutations.resetOverAllNumberOfPermutations();
 
 		vpertubations.clear();
 		hpertubations.clear();
@@ -247,21 +266,43 @@ public class Playfield extends Thread {
 				progress.setMax(2*playfieldsize);
 				progress.setProgress(0);
 		}
+		
 				
 		for (byte i = 0; i < playfieldsize; ++i) {
-			vpertubations.add(new sumPermutations(vblocks.get(i))); // Die
-																	// moeglichen
-																	// Permutationen
-																	// vorberechnen
+			if(isInterrupted()) return false;
+			sumPermutations tmpsumpermutation=new sumPermutations(vblocks.get(i));
+			numberOFpermutations+=tmpsumpermutation.determineNumberOfpermurtations();
+			vpertubations.add(tmpsumpermutation);
+			if(isInterrupted()) return false;
+			tmpsumpermutation=new sumPermutations(hblocks.get(i));
+			numberOFpermutations+=tmpsumpermutation.determineNumberOfpermurtations();
+			hpertubations.add(tmpsumpermutation);
+		} //komplexitaet abschaetzen
+		Log.d("amazing","permutations: "+numberOFpermutations);
+		
+		
+		
+		if(maxMemory*empiricalMemoryFactor<numberOFpermutations) {
+			isToComplex=true;
+			return false;
+		} else isToComplex=false;
+		
+		
+		
+		for (byte i = 0; i < playfieldsize; ++i) {
+			if(isInterrupted()) return false;
+			vpertubations.get(i).calculateAllPermutyations();
 			if(progress!=null) {
 				progress.incrementProgressBy(1);
 			}
-			hpertubations.add(new sumPermutations(hblocks.get(i)));
-			if(progress!=null)  {
+			if(isInterrupted()) return false;
+			hpertubations.get(i).calculateAllPermutyations();
+			if(progress!=null) {
 				progress.incrementProgressBy(1);
 			}
-		} // Die Vorberechnung der Summen aus dem Konstruktor hierher verlagert,
-			// da sonst der Hautpthread blockiert wird.
+		}
+		
+		
 		
 		if(progress!=null) {
 			handler.post( new Runnable() {
@@ -273,7 +314,7 @@ public class Playfield extends Thread {
 				}
 			}
 			);
-			
+	
 			progress.setProgress(0);
 			progress.setMax(playfieldsize*playfieldsize);
 		}
@@ -281,9 +322,11 @@ public class Playfield extends Thread {
 		do {
 			somthinChanges = false;
 			for (int i = 0; i < playfieldsize; ++i) {
-				somthinChanges |= tryLines(true, i);
+				if(isInterrupted()) return false;
+				somthinChanges |= tryLines(true, i,hpertubations,vpertubations);
 				// displayPlayfield();
-				somthinChanges |= tryLines(false, i);
+				if(isInterrupted()) return false;
+				somthinChanges |= tryLines(false, i,hpertubations,vpertubations);
 				// displayPlayfield();
 			}
 			// displayPlayfield();
@@ -327,8 +370,7 @@ public class Playfield extends Thread {
 	protected ArrayList<byte[]> hblocks;
 	protected ArrayList<byte[]> vblocks;
 
-	private ArrayList<sumPermutations> hpertubations = new ArrayList<sumPermutations>();
-	private ArrayList<sumPermutations> vpertubations = new ArrayList<sumPermutations>();
+	
 
 	// private summen // hier bloecke fuer die Summen einfuegen.
 

@@ -32,4 +32,12 @@ public class LittleHelpers {
 		++max;
 		return (byte) (Math.random()*max);
 	}
+	
+	public static int faculty(int zahl) {
+		int result=1;
+		for(int i=1;i<=zahl;++i) {
+			result*=i;
+		}
+		return result;
+	}
 }

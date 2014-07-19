@@ -1,8 +1,10 @@
 package de.amazingsax.japanese_sums;
 
 import android.app.Activity;
+import android.app.ActivityManager;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
@@ -60,6 +62,14 @@ public class StartActivity extends Activity implements OnClickListener {
 		playButton.setOnClickListener(this);
 		solveButton.setOnClickListener(this);
 		
+		Runtime rt = Runtime.getRuntime();
+		long maxMemory = rt.maxMemory();
+		Log.v("amazing", "maxMemory:" + Long.toString(maxMemory));
+		
+		ActivityManager am = (ActivityManager) getSystemService(ACTIVITY_SERVICE);
+		int memoryClass = am.getMemoryClass();
+		Log.v("amazing", "memoryClass:" + Integer.toString(memoryClass));
+		
 		
 	}
 
@@ -74,13 +84,13 @@ public class StartActivity extends Activity implements OnClickListener {
 			startActivity(intent); // Activity Spielfeld als löser starten.
 			break;
 		case R.id.newGameButton:
-//			Intent intent2 = new Intent(this,PlayfieldActivity.class);
-//			intent2.putExtra("playfieldSize",pickerPlayfieldSize.getValue());
-//			intent2.putExtra("maxNumber",pickerMaxNumber.getValue());
-//			intent2.putExtra("playAsGame",true);
-//			startActivity(intent2); // Activity Spielfeld als Rätsel starten
-			Toast toast = Toast.makeText(this,R.string.notimplementes,Toast.LENGTH_LONG);
-			toast.show();
+			Intent intent2 = new Intent(this,PlayfieldActivity.class);
+			intent2.putExtra("playfieldSize",pickerPlayfieldSize.getValue());
+			intent2.putExtra("maxNumber",pickerMaxNumber.getValue());
+			intent2.putExtra("playAsGame",true);
+			startActivity(intent2); // Activity Spielfeld als Rätsel starten
+//			Toast toast = Toast.makeText(this,R.string.notimplementes,Toast.LENGTH_LONG);
+//			toast.show();
 			break;
 		default:
 			break;

@@ -2,31 +2,58 @@ package de.amazingsax.japanese_sums;
 
 import java.util.ArrayList;
 
+import android.app.ProgressDialog;
+
+
 
 public class RiddleCreator extends Playfield {
+	
+	ProgressDialog progressOfcreating;
 
-	public RiddleCreator(PlayfieldActivity _context,byte playfieldsize, byte maxnumber) {
+	public RiddleCreator(PlayfieldActivity _context,ProgressDialog progress,byte playfieldsize, byte maxnumber) {
 		super(_context,playfieldsize, maxnumber);
+		progressOfcreating = progress;
 		// TODO Auto-generated constructor stub
 	}
 
 	@Override
 	public void run() {
-		// TODO Auto-generated method stub
+		createRiddle();
+		progressOfcreating.dismiss();
+	}
+	
+	public void createRiddle() {
+		boolean riddleIsValid=false;
+		do {
+			deleteEntries();
+			createEntries(); 		// Spielfeld füllen
+			if(calculateSumBlocks()) { 	// entsprechende Summen berechnen, wenn gültig
+				deleteEntries(); 		// Spielfeld frei machen
+				riddleIsValid=solve();  // Lösung auf eindeutigkeit und lösbarkeit prüfen 
+			}
+		} while(!riddleIsValid && !isInterrupted());
+	}
+	
+	public byte[][] getSolution() {
+		return getEntries();
 	}
 	
 	// erstellt ein Spielfeld mit
 	// zufälligen Einträgen
 	// erwartet das spielfeld bei aufruf leer ist. 
-	public void createEntries() {
+	private void createEntries() {
+		int[] zeilenOrder=randomOrder();
 		for(byte i=0;i<playfieldsize;++i)
 		{
+			byte zeile=(byte)zeilenOrder[i];
+			int[] spaltenOrder=randomOrder();
 			byte testvalue;
 			for(byte j=0;j<playfieldsize;++j) {
+				byte spalte=(byte)spaltenOrder[j];
 				do {
 				   testvalue=LittleHelpers.myrandom(maxNumber);
-				} while(!Feld[i][j].isValuePossible(testvalue));
-				this.setFixedValueAt(i,j,testvalue);
+				} while(!Feld[zeile][spalte].isValuePossible(testvalue));
+				this.setFixedValueAt(zeile,spalte,testvalue);
 				//this.displayPlayfield(); // fuers debuggen
 			}
 		}
@@ -37,7 +64,7 @@ public class RiddleCreator extends Playfield {
 	//Bestimmt horzontale und Vertikale Summenblöcke
 	//erwartet ausgefülltes spielfeld
 	
-	public boolean calculateSumBlocks() {
+	private boolean calculateSumBlocks() {
 		
 		hblocks = new ArrayList<byte[]>();
 		vblocks = new ArrayList<byte[]>();
@@ -90,6 +117,9 @@ public class RiddleCreator extends Playfield {
 			if (wasLastNumberNotZero) {
 				blockNumber++;
 			}
+			if(blockNumber==0) {
+				retValue=false;
+			}
 			byte[] uebergabe = new byte[blockNumber];
 			for (int k = 0; k < blockNumber; ++k) {
 				uebergabe[k] = summen[k];
@@ -99,13 +129,29 @@ public class RiddleCreator extends Playfield {
 		return retValue;
 	}
 	
-	public void deleteEntries() {
+	private void deleteEntries() {
 		for (byte i = 0; i < playfieldsize; ++i) {
 			for (byte j = 0; j < playfieldsize; ++j) {
 				Feld[i][j] = new Feldelement(); // alle Feldelemente
 												// neu "erschaffen" alte sind ggf. Fall für den garbage collector
 			}
 		}
+	}
+	
+	private int[] randomOrder() {
+		int[] result = new int[playfieldsize];
+		boolean[] used = new boolean[playfieldsize];
+		for(int i=0;i<used.length;++i) {
+			used[i]=false;
+		}
+		for(int i=0;i<result.length;++i) {
+			int versuch;
+			do{
+				versuch = LittleHelpers.myrandom((byte) (playfieldsize-1));
+			} while(used[versuch]);
+			result[i]=versuch;
+		}
+		return result;
 	}
 	
 	

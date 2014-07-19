@@ -5,6 +5,8 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.ListIterator;
 
+import android.util.Log;
+
 /**
  * erzeugt alle Permutastionen fuer eine Zeile Spalte mit gegebenen
  * summenbloecken
@@ -13,7 +15,20 @@ import java.util.ListIterator;
  * 
  */
 public class sumPermutations {
-
+	final String DEBUG_TAG="amazing";
+//	static int overAllNumberOfPermutations=0;
+	int numberOfPermutations;	
+	ArrayList<ArrayList<byte[]>> compatibleBlogs=null;
+	int maxNumberOfPlaces;
+	
+//	public static void resetOverAllNumberOfPermutations() {
+//		overAllNumberOfPermutations=0;
+//	}
+	
+//	public static int getoverAllPermutations() {
+//		return overAllNumberOfPermutations;
+//	}
+	
 	public static void setMaxNumber(byte _maxnumber, byte _playfieldsize) {
 		maxnumber = _maxnumber;
 		lineSize = _playfieldsize;
@@ -25,12 +40,9 @@ public class sumPermutations {
 					"Call setMaxnumber(byte maxnumber) before creating a sumPermutatin");
 		}
 		sums = sumsin.clone();
-		calculateAllPermutyations(); // alle permutationen vorberechnen
-		recentPermutation = zeilen.listIterator(); // iterator auf erste
+		//calculateAllPermutyations(); // alle permutationen vorberechnen
+		//recentPermutation = zeilen.listIterator(); // iterator auf erste
 													// permutation
-		if (zeilen.size() == 0) {
-			throw new IllegalStateException("There is no solution!");
-		}
 	}
 
 	public int getSize() {
@@ -186,13 +198,57 @@ public class sumPermutations {
 		} while (incrementindex(index, posibleblogs));
 		return result;
 	}
+	
+	public int determineNumberOfpermurtations() {
+		int numberOfPermutations=0;
+	    compatibleBlogs=findCompatibleBlogs();
+	    maxNumberOfPlaces=0;
+	    
+		for (int o = 0; o < compatibleBlogs.size(); ++o) {
+			ArrayList<byte[]> tmp = compatibleBlogs.get(o);
+			int tmpnumberOfPermutations = 1;
+			for (int p = 0; p < tmp.size(); ++p) {
+				tmpnumberOfPermutations *= LittleHelpers
+						.faculty(tmp.get(p).length);
+			}
+			int digits = 0;
+			for (byte[] block : tmp) {
+				digits += block.length;
+			} // Anzahl der stellen bestimmen
+			int freezeros = lineSize - digits - (tmp.size() - 1);
+			if (freezeros < 0)
+				continue; // dieser blog passt nicht in die Zeile
+			int numberOfPlaces = tmp.size() + 1;
 
-	private void calculateAllPermutyations() {
+			if (maxNumberOfPlaces < numberOfPlaces)
+				maxNumberOfPlaces = numberOfPlaces;
+
+			int numberOfZerosPossibilities = LittleHelpers.faculty(freezeros
+					+ numberOfPlaces - 1);
+			numberOfZerosPossibilities /= LittleHelpers.faculty(freezeros)
+					* LittleHelpers.faculty(numberOfPlaces - 1);
+			numberOfPermutations += tmpnumberOfPermutations
+					* numberOfZerosPossibilities;		
+		}
+		this.numberOfPermutations=numberOfPermutations;
+		return numberOfPermutations;
+	}
+	
+
+	public void calculateAllPermutyations() {
 		zeilen = new LinkedList<byte[]>();
 		int i = 0;
-
-		ArrayList<ArrayList<byte[]>> compatibleBlogs = findCompatibleBlogs();
-
+		int mnofz; // ((momentane anzahl von plätzen fuer freie nullen;
+		
+		if(compatibleBlogs==null) {
+			numberOfPermutations = determineNumberOfpermurtations();
+		}
+		
+		byte[][] alloczeilen= new byte[numberOfPermutations][lineSize]; // um den Speicher als ganzes zu allocieren und nicht fuer
+																	    // jede Permutation einzeln- spart speicher und Zeit
+		int[] zerosAtPlace = new int[maxNumberOfPlaces];
+		
+		int zeileToAdd=0;
 		for (ArrayList<byte[]> blogset : compatibleBlogs) {
 			int digits = 0;
 			for (byte[] block : blogset) {
@@ -202,9 +258,13 @@ public class sumPermutations {
 			if (freezeros < 0)
 				continue; // dieser blog passt nicht in die Zeile
 
-			int[] zerosAtPlace = new int[blogset.size() + 1];
-			zerosAtPlace[zerosAtPlace.length - 1] = freezeros;
-
+			//int[] zerosAtPlace = new int[blogset.size() + 1];
+			mnofz=blogset.size()+1; // ((momentane anzahl von plätzen fuer freie nullen;
+			for(int l=0;l<maxNumberOfPlaces;++l) zerosAtPlace[l]=0;
+			zerosAtPlace[mnofz - 1] = freezeros;
+		
+			
+			
 			boolean notcomplete = true;
 			do {
 				int j;
@@ -212,7 +272,8 @@ public class sumPermutations {
 				do {
 					j = blogset.size() - 1;
 					int momplaceforzeros = 0;
-					byte[] zeile = new byte[lineSize];
+				//	byte[] zeile = new byte[lineSize];
+					byte[] zeile = alloczeilen[zeileToAdd];
 					for (i = 0; i < zerosAtPlace[momplaceforzeros]; ++i) {
 						zeile[i] = 0;
 					}
@@ -224,21 +285,22 @@ public class sumPermutations {
 						for (int k = 0; k < zerosAtPlace[momplaceforzeros]; ++k) {
 							zeile[i++] = 0;
 						}
-						if (momplaceforzeros != zerosAtPlace.length - 1)
+						if (momplaceforzeros != mnofz - 1)
 							zeile[i++] = 0; // obligatorische Trennungsnull
 											// außer ganz hinten
 					}
 					i = 0;
 					zeilen.add(zeile);
+					++zeileToAdd;
 					while (!LittleHelpers.next_permutation(blogset.get(j))) {
 						--j;
 						if (j < 0)
 							break;
 					}
 				} while (j >= 0);
-
+				
 				boolean fertig;
-				int geradezuinkrementieren = zerosAtPlace.length - 2; // vorletztes
+				int geradezuinkrementieren = mnofz - 2; // vorletztes
 																		// Element
 				do {
 					int obergrenze = freezeros;
@@ -261,9 +323,9 @@ public class sumPermutations {
 						}
 					}
 				} while (!fertig);
-				zerosAtPlace[zerosAtPlace.length - 1] = freezeros;
-				for (int h = 0; h < (zerosAtPlace.length - 1); ++h) {
-					zerosAtPlace[zerosAtPlace.length - 1] -= zerosAtPlace[h];
+				zerosAtPlace[mnofz - 1] = freezeros;
+				for (int h = 0; h < (mnofz - 1); ++h) {
+					zerosAtPlace[mnofz - 1] -= zerosAtPlace[h];
 				}
 				// Die Elemente von Zerosatplace werden so durchiteriert, dass
 				// fuer das 1. Element die Werte 0..freezeros durchlaufen werden
@@ -274,6 +336,12 @@ public class sumPermutations {
 
 			} while (notcomplete);
 		}
+		Log.d(DEBUG_TAG,"erzeugte permutationen: "+zeileToAdd);
+		alloczeilen=null;
+		if (zeilen.size() == 0) {
+			throw new IllegalStateException("There is no solution!");
+		}
+		recentPermutation = zeilen.listIterator(); // listiterator auf erste permutation
 		// * For debugging and testing:
 
 		// for(byte[] zeile : zeilen) {

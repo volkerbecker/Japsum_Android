@@ -26,5 +26,10 @@
     <string name="numberToBig">Sum value is to high</string>
     <string name="enterSum">Enter values of the sum field</string>
     <string name="progressPermut">calculating permutations (1/2)</string>
+    <string name="toComplex">Maxheap is to low on this device for solving this riddle</string>
+    <string name="spaceButton">Space</string>
+    <string name="createRiddle">generating riddle</string>
+    <string name="check">Check</string>
+    <string name="richtig">CONTGRATULATIONS!! Your solution is correct!</string>
 
 </resources>

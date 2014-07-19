@@ -25,5 +25,8 @@
     <string name="numberToBig">Einer der Werte ist zu groß für den Wertebereich!</string>
     <string name="enterSum">Eingabe Summen</string>
     <string name="progressPermut">berechne Permutationen (1/2)</string>
+    <string name="toComplex">Auf diesem Gerät ist nicht genug RAM zur Lösung dieses Rätsels verfügbar.</string>
+    <string name="createRiddle">erstelle Rätsel</string>
+    <string name="richtig">GRATULATION! Deine Lösung ist richtig!</string>
 
 </resources>

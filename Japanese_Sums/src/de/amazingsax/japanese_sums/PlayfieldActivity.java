@@ -5,16 +5,23 @@ import java.util.ArrayList;
 import android.app.Activity;
 import android.app.FragmentManager;
 import android.app.ProgressDialog;
+import android.content.DialogInterface;
+import android.content.DialogInterface.OnDismissListener;
 import android.content.Intent;
+import android.opengl.Visibility;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.text.InputType;
 import android.view.Gravity;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.View.OnFocusChangeListener;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.GridLayout;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.Toast;
 
 public class PlayfieldActivity extends Activity implements OnClickListener {
@@ -49,7 +56,7 @@ public class PlayfieldActivity extends Activity implements OnClickListener {
 
 	GridLayout playField;
 
-	Button[][] eintraege;
+	EditText[][] eintraege;
 	Button[] vorgabenHorizontal;
 	Button[] vorgabenVertikal;
 
@@ -57,6 +64,7 @@ public class PlayfieldActivity extends Activity implements OnClickListener {
 
 	ImageView linksoben;
 
+	@SuppressWarnings("deprecation")
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		refereceForstaticHandler = this;
@@ -76,7 +84,8 @@ public class PlayfieldActivity extends Activity implements OnClickListener {
 				R.drawable.ic_launcher));
 
 		playField = (GridLayout) findViewById(R.id.playfield);
-		eintraege = new Button[playfieldSize][playfieldSize];
+		//eintraege = new Button[playfieldSize][playfieldSize];
+		eintraege = new EditText[playfieldSize][playfieldSize];
 		vorgabenHorizontal = new Button[playfieldSize];
 		vorgabenVertikal = new Button[playfieldSize];
 
@@ -114,27 +123,90 @@ public class PlayfieldActivity extends Activity implements OnClickListener {
 			}
 
 			for (int j = 0; j < playfieldSize; ++j) {
-				eintraege[i][j] = new Button(this);
+				//eintraege[i][j] = new Button(this);
+				GridLayout.LayoutParams entryparams = new GridLayout.LayoutParams();
+				entryparams.setGravity(Gravity.FILL_HORIZONTAL|Gravity.FILL_VERTICAL);
+				eintraege[i][j] = new EditText(this);
 				eintraege[i][j].setText(R.string.leererEintrag);
 				eintraege[i][j].setBackgroundResource(R.drawable.rectangle);
+				eintraege[i][j].setGravity(Gravity.CENTER_HORIZONTAL|Gravity.CENTER_VERTICAL);
+				eintraege[i][j].setInputType(InputType.TYPE_CLASS_NUMBER);
 				if(isAGame) {
-					eintraege[i][j].setOnClickListener(this); // Wenn
+					eintraege[i][j].setOnFocusChangeListener(new OnFocusChangeListener() {
+						
+						@Override
+						public void onFocusChange(View v, boolean hasFocus) {
+							if(!hasFocus) {
+								EditText cell=(EditText) v;
+								String s=cell.getText().toString();
+								int wert;
+								try {
+									wert=Integer.valueOf(s);
+									if(wert==0) {
+										cell.setBackgroundResource(R.drawable.blackrectangle);
+										cell.setTextColor(getResources().getColor(R.color.hintergrundfarbe));
+									} else
+									{
+										cell.setBackgroundResource(R.drawable.rectangle);
+										cell.setTextColor(getResources().getColor(R.color.black));
+									}
+								} catch (NumberFormatException e) {
+									cell.setText("");
+								}
+							}
+						}
+					}); 
 				}
 				// eintraege[i][j].setWidth(zellwidth);
 				// eintraege[i][j].setWidth(zellhight);
-				playField.addView(eintraege[i][j]);
+				playField.addView(eintraege[i][j],entryparams);
 			}
 		}
 		hblocks = new ArrayList<byte[]>();
 		vblocks = new ArrayList<byte[]>();
 		if (isAGame) {
-			RiddleCreator riddleCreator= new RiddleCreator(this,(byte)this.playfieldSize,(byte)this.maxNumber);
-			riddle=riddleCreator; // for testing
-			riddleCreator.createEntries(); //for testing
-			riddleCreator.calculateSumBlocks();
-			hblocks=riddleCreator.gethBlocks();
-			vblocks=riddleCreator.getvBlocks();
-			setAllVorgabenFromBlocks();
+			Button checkButton=(Button)findViewById(R.id.checkButton);
+			checkButton.setOnClickListener(this);
+			checkButton.setVisibility(View.VISIBLE);
+			
+			ProgressDialog createProgress = new ProgressDialog(this);
+			progressdialog=createProgress;
+			RiddleCreator riddleCreator= new RiddleCreator(this,createProgress,(byte)this.playfieldSize,(byte)this.maxNumber);
+			riddle=riddleCreator;
+			createProgress.setMessage(getResources().getString(R.string.createRiddle));
+			createProgress.setOnDismissListener(new OnDismissListener() {
+				
+				@Override
+				public void onDismiss(DialogInterface dialog) {
+					// TODO Auto-generated method stub
+					hblocks=riddle.gethBlocks(); // nach beenden des tasks ausführen
+					vblocks=riddle.getvBlocks();
+					setAllVorgabenFromBlocks();
+					values=riddle.getEntries();
+					riddle=null; // Der riddlecreator wird nun nicht mehr gebraucht -> dereferenzieren -> speicher freigeben
+				}
+			});
+			createProgress.setCancelable(false);
+			createProgress.setButton(getResources().getString(R.string.cancel), new DialogInterface.OnClickListener() {
+				
+				@Override
+				public void onClick(DialogInterface dialog, int which) {
+					progressdialog.cancel();
+				}
+			});
+			
+			createProgress.setOnCancelListener(new DialogInterface.OnCancelListener() {
+				
+				@Override
+				public void onCancel(DialogInterface dialog) {
+					riddle.interrupt();
+					riddle=null;
+					finish();	
+				}
+			});
+			createProgress.show();
+			riddleCreator.start();
+			//riddleCreator.createRiddle(); // to do in eigenen task packen
 			//showsolution(); // for testing
 			
 		} else {
@@ -232,34 +304,77 @@ public class PlayfieldActivity extends Activity implements OnClickListener {
 
 	private void showsolution() {
 		values = riddle.getEntries();
-		if (riddle.isSolveable() && riddle.isSolved()) {
+		
+		if(riddle.isToComplex) {
+			Toast toast = Toast.makeText(this, R.string.toComplex,
+					Toast.LENGTH_LONG); // todo -> alert Dialog
+			toast.show();
+			return;
+		}
+		if (riddle.isSolveable()) {
 			for (int i = 0; i < playfieldSize; ++i) {
 				for (int j = 0; j < playfieldSize; ++j) {
-					String s;
-					s = String.valueOf((int) values[i][j]);
-					eintraege[i][j].setText(s);
-					if (values[i][j] == (byte) 0) {
-						eintraege[i][j]
-								.setBackgroundResource(R.drawable.blackrectangle);
+					if (riddle.getFieldElement((byte) i, (byte) j).isFixed()) {
+						String s;
+						s = String.valueOf((int) values[i][j]);
+						eintraege[i][j].setText(s);
+						if (values[i][j] == (byte) 0) {
+							eintraege[i][j]
+									.setBackgroundResource(R.drawable.blackrectangle);
+						} else {
+							eintraege[i][j]
+									.setBackgroundResource(R.drawable.rectangle);
+						}
 					} else {
+						eintraege[i][j].setText("");
 						eintraege[i][j]
 								.setBackgroundResource(R.drawable.rectangle);
 					}
+
 				}
 
 			}
 		} else {
-			if (!riddle.isSolveable()) {
-				Toast toast = Toast.makeText(this, R.string.thereisnoSolution,
-						Toast.LENGTH_LONG); // todo -> alert Dialog
-				toast.show();
-			} else {
-				Toast toast = Toast.makeText(this, R.string.noSolutionFound,
-						Toast.LENGTH_LONG); // todo -> alert Dialog
-				toast.show();
-			}
+
+			Toast toast = Toast.makeText(this, R.string.thereisnoSolution,
+					Toast.LENGTH_LONG); // todo -> alert Dialog
+			toast.show();
+			return;
+		}
+		
+		if (!riddle.isSolved()) {
+			Toast toast = Toast.makeText(this, R.string.noSolutionFound,
+					Toast.LENGTH_LONG); // todo -> alert Dialog
+			toast.show();
 		}
 
+	}
+	
+	private void checkInput() {
+		String s;
+		int wert;
+		boolean allright=true;
+		
+		for(int i = 0 ; i<playfieldSize;++i) {
+			for(int j=0;j<playfieldSize;++j) {
+				s=eintraege[i][j].getText().toString();
+				try{
+					wert=Integer.valueOf(s);
+					if(wert == values[i][j]) {
+						eintraege[i][j].setTextColor(getResources().getColor(R.color.richtig));
+					} else {
+						eintraege[i][j].setTextColor(getResources().getColor(R.color.falsch));
+						allright=false;
+					}
+				} catch (NumberFormatException e) {
+					allright=false;
+				}
+			}
+		}
+		if(allright) {
+			Toast toast= Toast.makeText(this,R.string.richtig,Toast.LENGTH_LONG);
+			toast.show();
+		}
 	}
 
 	public void onClick(View v) {
@@ -267,19 +382,23 @@ public class PlayfieldActivity extends Activity implements OnClickListener {
 			solveRiddle();
 		} else {
 			if (v.getId() == R.id.backButton) {
-				//Intent intent = new Intent(this, StartActivity.class);
-				//startActivity(intent);
+				// Intent intent = new Intent(this, StartActivity.class);
+				// startActivity(intent);
 				this.finish();
 			} else {
-				// ist vorgabebutton gedrueckt wurden?
-				for (int i = 0; i < playfieldSize; ++i) {
-					boolean horizontal;
-					if ((horizontal = (v == vorgabenHorizontal[i]))
-							|| v == vorgabenVertikal[i]) {
-						showSumDialog(i, horizontal);
+				if (v.getId() == R.id.checkButton) {
+					checkInput();
+				} else {
+					// ist vorgabebutton gedrueckt wurden?
+					for (int i = 0; i < playfieldSize; ++i) {
+						boolean horizontal;
+						if ((horizontal = (v == vorgabenHorizontal[i]))
+								|| v == vorgabenVertikal[i]) {
+							showSumDialog(i, horizontal);
+						}
 					}
-				}
 
+				}
 			}
 		}
 	}
