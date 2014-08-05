@@ -1,35 +1,42 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <string name="app_name">Japanese Sums Solver</string>
-    <string name="playfieldsize">Playfieldsize</string>
-    <string name="maxNumber">max. Value</string>
-    <string name="solveButton">Solve Puzzle</string>
-    <string name="newGame">New Game</string>
-    <string name="regeln">what are japanese sums</string>
-    <string name="notimplementes">this functionality is not implemented yet but planned for the next version.</string>
-    <string name="explain">what are the rules?</string>
-    <string name="title_activity_playfield">Japanese Sum Solver </string>
-    <string name="hello_world">Hello world!</string>
-    <string name="solve">Solve</string>
-    <string name="back">Back</string>
+    <string name="app_name">Japanische Summen Löser</string>
+    <string name="playfieldsize">Spielfeldgröße</string>
+    <string name="maxNumber">Maximalwert</string>
+    <string name="solveButton">Löse Rätsel</string>
+    <string name="newGame">Neues Spiel</string>
+    <string name="regeln">wie funktionieren Japanische Summen?</string>
+    <string name="notimplementes">Diese Funktion ist noch nicht implementiert, dies ist für die nächste Version geplant!</string>
+    <string name="explain">Wie funktioniert das Spiel?</string>
+    <string name="title_activity_playfield">Japanische Summen Löser</string>
+    <string name="solve">Löse!</string>
+    <string name="back">Zurück</string>
     <string name="leereVorgabe">...</string>
     <string name="leererEintrag"></string>
-    <string name="EnterSums">enter the sequence of sums (e. g. 3 5 7)</string>
+    <string name="EnterSums">Gib die Folge von Summen ein (z.B. 3 5 7)</string>
     <string name="next">Okay</string>
-    <string name="numberInvalid">Input is not a sequence of numbers!</string>
+    <string name="numberInvalid">Die eingabe darf nur Zahlen, getrennt durch Leerzeichen, enthalten.</string>
     <string name="cancel">Cancel</string>
-    <string name="playfieldnotOkay">Fill out all sum fields first!</string>
-    <string name="progressdialog">Calculating entries(2/2)</string>
-    <string name="thereisnoSolution">There is no solution for the given values!</string>
-    <string name="noSolutionFound">The solution of this riddle is not unique!</string>
-    <string name="numberToBig">Sum value is to high</string>
-    <string name="enterSum">Enter values of the sum field</string>
-    <string name="progressPermut">calculating permutations (1/2)</string>
-    <string name="toComplex">Maxheap is to low on this device for solving this riddle</string>
-    <string name="spaceButton">Space</string>
-    <string name="createRiddle">generating riddle</string>
+    <string name="playfieldnotOkay">Bitte fülle erst alle Summenfelder aus!</string>
+    <string name="progressdialog">berechne Eintraege(2/2)</string>
+    <string name="thereisnoSolution">Für diese Summenfelder existiert keine Lösung</string>
+    <string name="noSolutionFound">Die Lösung für dieses Rätsel ist nicht eindeutig!</string>
+    <string name="numberToBig">Einer der Werte ist zu groß für den Wertebereich!</string>
+    <string name="enterSum">Eingabe Summen</string>
+    <string name="progressPermut">berechne Permutationen (1/2)</string>
+    <string name="toComplex">Auf diesem Gerät ist nicht genug RAM zur Lösung dieses Rätsels verfügbar.</string>
+    <string name="createRiddle">erstelle Rätsel</string>
+    <string name="richtig">GRATULATION! Erreichte Punkte:</string>
+    <string name="undo">Undo</string>
+    <string name="redo">Redo</string>
     <string name="check">Check</string>
-    <string name="richtig">CONTGRATULATIONS!! Your solution is correct!</string>
+    <string name="highscore">Highscore:</string>
+    <string name="userName">Benutzername</string>
+    <string name="usernameText">Der Benutzername wird für die Onlinehighscoreliste benötigt- Wenn die offline wählen gehen erzielte Punkte verloren. </string>
+    <string name="newUserButton">Neuer Nutzer</string>
+    <string name="loginButton">Login</string>
+    <string name="offlineButton">Offline</string>
+    <string name="spaceButton">Space</string>
 
 </resources>

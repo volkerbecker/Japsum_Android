@@ -14,11 +14,25 @@
         android:orientation="horizontal" >
 
         <Button
+            android:id="@+id/undoButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/undo" 
+            android:visibility="invisible" />
+
+        <Button
+            android:id="@+id/redoButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/redo" 
+        	android:visibility="invisible" />
+
+        <Button
             android:id="@+id/checkButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/check" 
-            android:visibility="invisible"/>
+            android:text="@string/check"
+            android:visibility="invisible" />
 
         <Button
             android:id="@+id/solveButton2"
@@ -33,7 +47,6 @@
             android:layout_height="wrap_content"
             android:onClick="onClick"
             android:text="@string/back" />
-
     </LinearLayout>
 
     <HorizontalScrollView 

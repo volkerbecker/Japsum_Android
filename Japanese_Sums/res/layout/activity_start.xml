@@ -3,13 +3,13 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/hintergrundfarbe"
+    android:gravity="center_vertical"
     tools:context="${packageName}.${activityClass}" >
 
     <TextView
         android:id="@+id/textView2"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_above="@+id/maxNumberPicker"
         android:layout_alignLeft="@+id/maxNumberPicker"
         android:text="@string/maxNumber" />
 
@@ -17,45 +17,58 @@
         android:id="@+id/textView1"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_above="@+id/maxNumberPicker"
         android:layout_alignLeft="@+id/playfieldSizePicker"
         android:text="@string/playfieldsize" />
-
-    <Button
-        android:id="@+id/solveButton2"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignLeft="@+id/playfieldSizePicker"
-        android:layout_alignRight="@+id/maxNumberPicker"
-        android:layout_below="@+id/playfieldSizePicker"
-        android:layout_marginTop="54dp"
-        android:text="@string/solveButton" />
-
-    <Button
-        android:id="@+id/newGameButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignLeft="@+id/solveButton2"
-        android:layout_alignRight="@+id/solveButton2"
-        android:layout_below="@+id/solveButton2"
-        android:layout_marginTop="26dp"
-        android:text="@string/newGame" />
 
     <NumberPicker
         android:id="@+id/playfieldSizePicker"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentTop="true"
-        android:layout_marginLeft="78dp"
-        android:layout_marginTop="62dp" />
+        android:layout_alignLeft="@+id/solveButton2"
+        android:layout_below="@+id/textView1"
+        android:layout_marginTop="5dp" />
+
+    <Button
+        android:id="@+id/solveButton2"
+        android:layout_width="200dp"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/newGameButton"
+        android:layout_centerHorizontal="true"
+        android:text="@string/solveButton" />
+
+    <Button
+        android:id="@+id/newGameButton"
+        android:layout_width="200dp"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_below="@+id/playfieldSizePicker"
+        android:text="@string/newGame" />
 
     <NumberPicker
         android:id="@+id/maxNumberPicker"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignTop="@+id/playfieldSizePicker"
-        android:layout_marginLeft="38dp"
-        android:layout_toRightOf="@+id/textView1" />
+        android:layout_below="@+id/textView2"
+        android:layout_alignRight="@+id/solveButton2"
+        android:layout_marginTop="5dp" />
+
+    <TextView
+        android:id="@+id/textView3"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/solveButton2"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="15dp"
+        android:text="@string/highscore"
+        android:textAppearance="?android:attr/textAppearanceLarge" />
+
+    <TextView
+        android:id="@+id/highscores"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/textView3"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="20dp"
+        android:text="TextView" />
 
 </RelativeLayout>

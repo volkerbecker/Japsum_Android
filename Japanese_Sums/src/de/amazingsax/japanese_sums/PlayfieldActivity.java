@@ -1,6 +1,8 @@
 package de.amazingsax.japanese_sums;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.ListIterator;
 
 import android.app.Activity;
 import android.app.FragmentManager;
@@ -8,11 +10,12 @@ import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnDismissListener;
 import android.content.Intent;
-import android.opengl.Visibility;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.text.Editable;
 import android.text.InputType;
+import android.text.TextWatcher;
 import android.view.Gravity;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -21,12 +24,12 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.GridLayout;
 import android.widget.ImageView;
-import android.widget.ProgressBar;
 import android.widget.Toast;
 
 public class PlayfieldActivity extends Activity implements OnClickListener {
 
 	static PlayfieldActivity refereceForstaticHandler;
+	private int checkcounter;
 
 	static class calculationReadyHandler extends Handler {
 
@@ -37,6 +40,27 @@ public class PlayfieldActivity extends Activity implements OnClickListener {
 		}
 
 	}
+	
+	private class SpecialTextWatcher implements TextWatcher{
+
+	    private PlayFieldCell view;
+	    private SpecialTextWatcher(PlayFieldCell view) {
+	        this.view = view;
+	    }
+
+	    public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+	    	if(!view.isIgnoreTextChange()) {
+	    		onMove(view,true);
+	    	}
+	    }
+	    public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {}
+
+	    public void afterTextChanged(Editable editable) {
+	    	if(!view.isIgnoreTextChange()) {
+	    		onMove(view,false);
+	    	}
+	     }
+	};
 
 	calculationReadyHandler handler;
 	public ProgressDialog progressdialog;
@@ -56,15 +80,20 @@ public class PlayfieldActivity extends Activity implements OnClickListener {
 
 	GridLayout playField;
 
-	EditText[][] eintraege;
+	PlayFieldCell[][] eintraege;
 	Button[] vorgabenHorizontal;
 	Button[] vorgabenVertikal;
 
 	byte[][] values;
 
 	ImageView linksoben;
+	
+	private String oldvalue;
+	
+	private LinkedList<Move> moves;
+	private ListIterator<Move> movesIterator;
 
-	@SuppressWarnings("deprecation")
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		refereceForstaticHandler = this;
@@ -72,6 +101,7 @@ public class PlayfieldActivity extends Activity implements OnClickListener {
 		setContentView(R.layout.activity_playfield);
 		Intent intent = getIntent();
 		Bundle data = intent.getExtras();
+		checkcounter=0;
 
 		playfieldSize = data.getInt("playfieldSize"); // Spielfeldgröße setzen
 		maxNumber = data.getInt("maxNumber"); // Maximalwert setzen
@@ -85,7 +115,7 @@ public class PlayfieldActivity extends Activity implements OnClickListener {
 
 		playField = (GridLayout) findViewById(R.id.playfield);
 		//eintraege = new Button[playfieldSize][playfieldSize];
-		eintraege = new EditText[playfieldSize][playfieldSize];
+		eintraege = new PlayFieldCell[playfieldSize][playfieldSize];
 		vorgabenHorizontal = new Button[playfieldSize];
 		vorgabenVertikal = new Button[playfieldSize];
 
@@ -126,45 +156,66 @@ public class PlayfieldActivity extends Activity implements OnClickListener {
 				//eintraege[i][j] = new Button(this);
 				GridLayout.LayoutParams entryparams = new GridLayout.LayoutParams();
 				entryparams.setGravity(Gravity.FILL_HORIZONTAL|Gravity.FILL_VERTICAL);
-				eintraege[i][j] = new EditText(this);
+				eintraege[i][j] = new PlayFieldCell(this);
 				eintraege[i][j].setText(R.string.leererEintrag);
 				eintraege[i][j].setBackgroundResource(R.drawable.rectangle);
 				eintraege[i][j].setGravity(Gravity.CENTER_HORIZONTAL|Gravity.CENTER_VERTICAL);
 				eintraege[i][j].setInputType(InputType.TYPE_CLASS_NUMBER);
+				eintraege[i][j].setLine((byte) i);
+				eintraege[i][j].setColumn((byte) j);
 				if(isAGame) {
+					eintraege[i][j].addTextChangedListener(new SpecialTextWatcher(eintraege[i][j]));
 					eintraege[i][j].setOnFocusChangeListener(new OnFocusChangeListener() {
 						
 						@Override
 						public void onFocusChange(View v, boolean hasFocus) {
-							if(!hasFocus) {
-								EditText cell=(EditText) v;
-								String s=cell.getText().toString();
-								int wert;
-								try {
-									wert=Integer.valueOf(s);
-									if(wert==0) {
-										cell.setBackgroundResource(R.drawable.blackrectangle);
-										cell.setTextColor(getResources().getColor(R.color.hintergrundfarbe));
-									} else
-									{
-										cell.setBackgroundResource(R.drawable.rectangle);
-										cell.setTextColor(getResources().getColor(R.color.black));
-									}
-								} catch (NumberFormatException e) {
-									cell.setText("");
-								}
+							EditText view=(EditText)v;
+							if(view.getText().toString().equals("0")) {
+								if(hasFocus) {
+									
+										view.setTextColor(getResources().getColor(R.color.hintergrundfarbe));
+									
+								} else
+									view.setTextColor(getResources().getColor(R.color.black));
 							}
 						}
-					}); 
+					});
 				}
-				// eintraege[i][j].setWidth(zellwidth);
-				// eintraege[i][j].setWidth(zellhight);
 				playField.addView(eintraege[i][j],entryparams);
 			}
 		}
 		hblocks = new ArrayList<byte[]>();
 		vblocks = new ArrayList<byte[]>();
-		if (isAGame) {
+		if (isAGame)
+			prepareActivityAsGame();
+		else {
+			for (int i = 0; i < playfieldSize; ++i) {
+				hblocks.add(null);
+				vblocks.add(null);
+			}
+		}
+
+	}
+
+	@SuppressWarnings("deprecation")
+	private void prepareActivityAsGame() {
+		{
+			moves = new LinkedList<Move>();
+			moves.clear(); // redundant
+			movesIterator=moves.listIterator();
+			
+			Button solveButton =(Button)findViewById(R.id.solveButton2);
+			solveButton.setVisibility(View.GONE);
+			
+			Button undoButton=(Button)findViewById(R.id.undoButton);
+			undoButton.setOnClickListener(this);
+			undoButton.setVisibility(View.VISIBLE);
+			
+			
+			Button redoButton=(Button)findViewById(R.id.redoButton);
+			redoButton.setOnClickListener(this);
+			redoButton.setVisibility(View.VISIBLE);
+			
 			Button checkButton=(Button)findViewById(R.id.checkButton);
 			checkButton.setOnClickListener(this);
 			checkButton.setVisibility(View.VISIBLE);
@@ -179,11 +230,13 @@ public class PlayfieldActivity extends Activity implements OnClickListener {
 				@Override
 				public void onDismiss(DialogInterface dialog) {
 					// TODO Auto-generated method stub
-					hblocks=riddle.gethBlocks(); // nach beenden des tasks ausführen
-					vblocks=riddle.getvBlocks();
-					setAllVorgabenFromBlocks();
-					values=riddle.getEntries();
-					riddle=null; // Der riddlecreator wird nun nicht mehr gebraucht -> dereferenzieren -> speicher freigeben
+					if(riddle!=null) {
+						hblocks=riddle.gethBlocks(); // nach beenden des tasks ausführen
+						vblocks=riddle.getvBlocks();
+						setAllVorgabenFromBlocks();
+						values=riddle.getEntries();
+						riddle=null; // Der riddlecreator wird nun nicht mehr gebraucht -> dereferenzieren -> speicher freigeben
+					}
 				}
 			});
 			createProgress.setCancelable(false);
@@ -209,13 +262,7 @@ public class PlayfieldActivity extends Activity implements OnClickListener {
 			//riddleCreator.createRiddle(); // to do in eigenen task packen
 			//showsolution(); // for testing
 			
-		} else {
-			for (int i = 0; i < playfieldSize; ++i) {
-				hblocks.add(null);
-				vblocks.add(null);
-			}
 		}
-
 	}
 
 	public int getmaxSum() {
@@ -361,7 +408,9 @@ public class PlayfieldActivity extends Activity implements OnClickListener {
 				try{
 					wert=Integer.valueOf(s);
 					if(wert == values[i][j]) {
-						eintraege[i][j].setTextColor(getResources().getColor(R.color.richtig));
+						if (wert!=0) {
+							eintraege[i][j].setTextColor(getResources().getColor(R.color.richtig));
+						}
 					} else {
 						eintraege[i][j].setTextColor(getResources().getColor(R.color.falsch));
 						allright=false;
@@ -372,42 +421,111 @@ public class PlayfieldActivity extends Activity implements OnClickListener {
 			}
 		}
 		if(allright) {
-			Toast toast= Toast.makeText(this,R.string.richtig,Toast.LENGTH_LONG);
+			int points=playfieldSize*playfieldSize-checkcounter;
+			setResult(points);
+			String toasttext=getResources().getString(R.string.richtig);
+			toasttext+=" "+Integer.toString(points);
+			Toast toast= Toast.makeText(this,toasttext,Toast.LENGTH_LONG);
 			toast.show();
+			finish();
 		}
 	}
 
 	public void onClick(View v) {
-		if (v.getId() == R.id.solveButton2) {
-			solveRiddle();
-		} else {
-			if (v.getId() == R.id.backButton) {
-				// Intent intent = new Intent(this, StartActivity.class);
-				// startActivity(intent);
-				this.finish();
-			} else {
-				if (v.getId() == R.id.checkButton) {
-					checkInput();
-				} else {
-					// ist vorgabebutton gedrueckt wurden?
-					for (int i = 0; i < playfieldSize; ++i) {
-						boolean horizontal;
-						if ((horizontal = (v == vorgabenHorizontal[i]))
-								|| v == vorgabenVertikal[i]) {
-							showSumDialog(i, horizontal);
-						}
-					}
+		switch (v.getId()) {
 
+		case R.id.solveButton2:
+			solveRiddle();
+			break;
+		case R.id.backButton:
+			// Intent intent = new Intent(this, StartActivity.class);
+			// startActivity(intent);
+			this.finish();
+			break;
+		case R.id.checkButton:
+			checkInput();
+			checkcounter++;
+			break;
+		case R.id.undoButton:
+			undo();
+			break;
+		case R.id.redoButton:
+			redo();
+			break;
+		default:
+
+			for (int i = 0; i < playfieldSize; ++i) {
+				boolean horizontal;
+				if ((horizontal = (v == vorgabenHorizontal[i]))
+						|| v == vorgabenVertikal[i]) {
+					showSumDialog(i, horizontal);
 				}
 			}
+
 		}
 	}
+	
+	protected void undo() {
+		if(movesIterator.hasPrevious()) {
+			Move move = movesIterator.previous();
+			eintraege[move.getLine()][move.getColumn()].setIgnoreTextChange(true);
+			eintraege[move.getLine()][move.getColumn()].setText(move.getOldvalue());
+			eintraege[move.getLine()][move.getColumn()].setIgnoreTextChange(false);
+		}
+	}
+	
+	protected void redo() {
+		if(movesIterator.hasNext()) {
+			Move move = movesIterator.next();
+			eintraege[move.getLine()][move.getColumn()].setIgnoreTextChange(true);
+			eintraege[move.getLine()][move.getColumn()].setText(move.getNewvalue());
+			eintraege[move.getLine()][move.getColumn()].setIgnoreTextChange(false);
+		}
+	}
+	
 
 	private void showSumDialog(int i, boolean horizontal) {
 		FragmentManager fm = getFragmentManager();
 		SummenDialog summenDialog = new SummenDialog();
 		summenDialog.setContext(this, i, horizontal);
 		summenDialog.show(fm, "enter sum");
+	}
+
+	private void onMove(View v,boolean movebegins) {
+		PlayFieldCell cell=(PlayFieldCell) v;
+		if(movebegins) {
+			oldvalue = cell.getText().toString(); 
+			return;
+		}
+		String s=cell.getText().toString();
+		int wert;
+		try {
+			wert=Integer.valueOf(s);
+			if(wert==0) {
+				cell.setBackgroundResource(R.drawable.blackrectangle);
+				cell.setTextColor(getResources().getColor(R.color.black));
+			} else
+			{
+				cell.setBackgroundResource(R.drawable.rectangle);
+				cell.setTextColor(getResources().getColor(R.color.black));
+			}
+		} catch (NumberFormatException e) {
+			cell.setBackgroundResource(R.drawable.rectangle);
+			cell.setTextColor(getResources().getColor(R.color.black));
+		}
+		Move move = new Move();
+		move.setNewvalue(cell.getText().toString());
+		move.setOldvalue(oldvalue);
+		move.setLine(cell.getLine());
+		move.setColumn(cell.getColumn());
+		if (movesIterator.hasNext()) {
+			while (movesIterator.hasNext()) {
+				movesIterator.next();
+				movesIterator.remove();
+			}
+		}
+		movesIterator.add(move);
+		movesIterator = moves.listIterator(moves.size());
 	}
 
 }

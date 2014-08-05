@@ -85,7 +85,6 @@ public class SummenDialog extends DialogFragment implements OnClickListener {
 			}
 			break;
 		case R.id.spaceButton:
-			String s=eingabe.getText().toString();
 			eingabe.dispatchKeyEvent(new KeyEvent(KeyEvent.ACTION_DOWN,KeyEvent.KEYCODE_SPACE));
 			break;
 		case R.id.sumDialogCancel:

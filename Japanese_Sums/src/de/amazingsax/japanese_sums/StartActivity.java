@@ -2,7 +2,9 @@ package de.amazingsax.japanese_sums;
 
 import android.app.Activity;
 import android.app.ActivityManager;
+import android.app.FragmentManager;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -10,12 +12,15 @@ import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.NumberPicker;
 import android.widget.NumberPicker.OnValueChangeListener;
-import android.widget.Toast;
+import android.widget.TextView;
 
 public class StartActivity extends Activity implements OnClickListener {
 	
 	final int maxplayfieldSize=15; // gibt eignetlich keinen zwingenden Grund
 	final int maxnumber=9; // aber wenn zweistellige Zahlen erlaubt waeren wirds unübersichtlich
+	
+	String username;
+	boolean online=false;
 	
 	NumberPicker pickerPlayfieldSize;
 	NumberPicker pickerMaxNumber;
@@ -70,8 +75,64 @@ public class StartActivity extends Activity implements OnClickListener {
 		int memoryClass = am.getMemoryClass();
 		Log.v("amazing", "memoryClass:" + Integer.toString(memoryClass));
 		
-		
+		loadSettings();
+		if(username==null && online == true ) {
+			showNewUserDialog();
+		}		
 	}
+	
+	
+
+	private void showNewUserDialog() {
+		FragmentManager fm = getFragmentManager();
+		NewUserDialog newUser= new NewUserDialog(this);
+		newUser.setCancelable(false);
+		newUser.show(fm, "new user");		
+	}
+
+
+
+	@Override
+	protected void onResume() {
+		super.onResume();
+		TextView tv = (TextView)findViewById(R.id.highscores);
+		tv.setText(Integer.toString(readHighscore()));
+	}
+	
+	private void loadSettings() {
+		SharedPreferences pref = getSharedPreferences("GAME",0);
+		username=pref.getString("USERNAME",null);
+		online=pref.getBoolean("ONLINE",true);
+	}
+
+
+
+	private int readHighscore() {
+		SharedPreferences pref = getSharedPreferences("GAME",0);
+		return pref.getInt("HIGHSCORE",0);
+	}
+
+
+
+	@Override
+	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+		if(requestCode==1) {
+			if(resultCode>readHighscore()) {
+				writeHighscore(resultCode);
+			}
+		}
+	}
+
+
+
+	private void writeHighscore(int highscore) {
+		SharedPreferences pref=getSharedPreferences("GAME",0);
+		SharedPreferences.Editor editor = pref.edit();
+		editor.putInt("HIGHSCORE", highscore);
+		editor.commit();
+	}
+
+
 
 	@Override
 	public void onClick(View v) {
@@ -88,7 +149,7 @@ public class StartActivity extends Activity implements OnClickListener {
 			intent2.putExtra("playfieldSize",pickerPlayfieldSize.getValue());
 			intent2.putExtra("maxNumber",pickerMaxNumber.getValue());
 			intent2.putExtra("playAsGame",true);
-			startActivity(intent2); // Activity Spielfeld als Rätsel starten
+			startActivityForResult(intent2, 1); // Activity Spielfeld als Rätsel starten
 //			Toast toast = Toast.makeText(this,R.string.notimplementes,Toast.LENGTH_LONG);
 //			toast.show();
 			break;

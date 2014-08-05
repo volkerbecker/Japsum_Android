@@ -6,7 +6,6 @@ package de.amazingsax.japanese_sums;
 import java.util.ArrayList;
 
 import android.app.ProgressDialog;
-import android.content.Context;
 import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
